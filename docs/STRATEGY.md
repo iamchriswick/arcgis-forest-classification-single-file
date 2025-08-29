@@ -24,7 +24,11 @@ Use semantic versioning format `toolbox_0_{phase}_{patch}.py` where:
 - **Test each phase** before proceeding to the next
 - **Preserve all working functionality** when moving between phases
 - **Document changes** and reasoning in code comments
-- **Follow ArcGIS Pro `.pyt` toolbox standards** throughout development
+- **Before handing off to the user:**
+  - **Add new files** to `git`
+  - **Commit changes** to `git`
+  - **Clean cache** by running task `cache_cleanup`
+- ~~**Follow ArcGIS Pro `.pyt` toolbox standards** throughout development~~
 
 ### Testing Strategy
 

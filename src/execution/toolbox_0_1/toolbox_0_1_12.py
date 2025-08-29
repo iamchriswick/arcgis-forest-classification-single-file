@@ -170,7 +170,10 @@ class ForestClassificationTool(object):
         output_layer = arcpy.Parameter(
             displayName="Output Feature Layer",
             name="output_layer",
-            datatype="Feature Layer; Feature Class",  # Multi-type: dropdown when map active, browse otherwise
+            datatype=[
+                "Feature Layer",
+                "Feature Class",
+            ],  # Multi-type: dropdown when map active, browse otherwise
             parameterType="Required",
             direction="Input",
         )
@@ -218,91 +221,3 @@ class ForestClassificationTool(object):
     def postExecute(self, parameters):
         """This method takes place after outputs are processed and added to the display."""
         arcpy.AddMessage("🧹 Phase 1 post-execution cleanup completed")
-
-
-# ===== TOOLVALIDATOR CODE FOR .ATBX SCRIPT TOOL =====
-# Copy this to .atbx Properties → Validation:
-
-"""
-import arcpy, os
-
-class ToolValidator(object):
-    def __init__(self):
-        self.params = arcpy.GetParameterInfo()  # 0=output_layer, 1=multithreading_config, 2=memory_config
-
-    # --- helpers ---
-    def _cpu_cores(self):
-        try:
-            return max(1, os.cpu_count() or 4)
-        except Exception:
-            return 4
-
-    def _avail_mem_gb(self):
-        try:
-            import psutil
-            return max(2, int(psutil.virtual_memory().available / (1024**3)))
-        except Exception:
-            return 8  # fallback if psutil not present
-
-    def _thread_labels(self, cores):
-        # Enhanced GUI with Auto option and detailed thread information
-        auto = "Auto (let system decide)"
-        moderate = max(2, int(cores * 0.45))    # 45% utilization
-        high = max(3, int(cores * 0.90))        # 90% utilization
-        return [
-            auto,
-            f"Moderate - {moderate} threads (45% utilization)",
-            f"High - {high} threads (90% utilization)"
-        ]
-
-    def _memory_labels(self, avail_gb):
-        # Enhanced GUI with detailed memory allocation information
-        conservative = max(2, int(avail_gb * 0.30))  # 30%
-        balanced = max(4, int(avail_gb * 0.60))      # 60% 
-        aggressive = max(6, int(avail_gb * 0.90))    # 90%
-        return [
-            f"{conservative} GB (30% of {avail_gb:.1f} GB available)",
-            f"{balanced} GB (60% of {avail_gb:.1f} GB available)",
-            f"{aggressive} GB (90% of {avail_gb:.1f} GB available)"
-        ]
-
-    # --- lifecycle ---
-    def initializeParameters(self):
-        # Dropdowns with default = option 2
-        self.params[1].filter.list = self._thread_labels(self._cpu_cores())
-        self.params[1].value       = self.params[1].filter.list[1]
-
-        self.params[2].filter.list = self._memory_labels(self._avail_mem_gb())
-        self.params[2].value       = self.params[2].filter.list[1]
-
-        # Populate output layer dropdown if a map is active
-        try:
-            aprx = arcpy.mp.ArcGISProject("CURRENT")
-            m = aprx.activeMap
-            if m:
-                names = [lyr.name for lyr in m.listLayers() if getattr(lyr, "isFeatureLayer", False)]
-                if names:
-                    self.params[0].filter.list = names
-                    if not self.params[0].value:
-                        self.params[0].value = names[0]
-        except Exception:
-            pass
-        return
-
-    def updateParameters(self):
-        # Refresh if context changes
-        self.params[1].filter.list = self._thread_labels(self._cpu_cores())
-        self.params[2].filter.list = self._memory_labels(self._avail_mem_gb())
-
-        try:
-            aprx = arcpy.mp.ArcGISProject("CURRENT")
-            m = aprx.activeMap
-            if m:
-                self.params[0].filter.list = [lyr.name for lyr in m.listLayers() if getattr(lyr, "isFeatureLayer", False)]
-        except Exception:
-            pass
-        return
-
-    def updateMessages(self):
-        return
-"""
