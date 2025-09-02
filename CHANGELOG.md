@@ -5,6 +5,30 @@ All notable changes to the Forest Classification Tool single file implementation
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2025-09-02
+
+### Fixed
+
+- **Parameter alignment corrected** - Fixed `RuntimeError: Object: Error in getting parameter as text` by aligning code with actual .atbx tool parameters
+- **Tool execution now functional** - Removed non-existent input_layer parameter extraction (GetParameterAsText(0))
+- **Parameter indexing corrected** - Aligned parameter extraction with actual tool structure: output_layer (0), thread_count (1), memory_allocation (2)
+- **Sample data integration** - Updated logic to use predefined data sources from IMPORT_FIELDS.json instead of user input layer
+
+### Changed
+
+- **Removed input_layer parameter** - Phase 2 processes predefined data sources listed in IMPORT_FIELDS.json, not user input
+- **Updated parameter extraction** - Shifted all GetParameterAsText() indexes down by 1 to match actual tool parameters
+- **Added sample data logic** - Tool now uses sample import dataset from data/samples/import_dataset/
+- **Enhanced logging** - Removed input layer references, focused on output layer and processing parameters
+
+### Technical Details
+
+- **Parameter structure corrected**: 3 parameters (not 4) - Output Layer, Thread Count, Memory Allocation
+- **Data source strategy**: Uses predefined datasets from IMPORT_FIELDS.json structure
+- **Sample data path**: single_file_python_script/data/samples/import_dataset/Grid_8m_Sample.shp
+- **Error resolution**: Fixed index 3 access error by aligning code with actual .atbx tool configuration
+- **Test validation**: All 93 tests passing after parameter alignment fix
+
 ## [0.2.2] - 2025-09-02
 
 ### Fixed

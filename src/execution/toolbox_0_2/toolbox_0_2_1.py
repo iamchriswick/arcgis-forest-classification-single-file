@@ -31,6 +31,7 @@ Version History:
 """
 
 import arcpy
+import os
 
 
 def get_system_capabilities():
@@ -438,13 +439,12 @@ def main():
     arcpy.AddMessage("📋 Phase 2: Core Data Processing with basic field management")
 
     # Extract Phase 2 parameters using GetParameterAsText
-    input_layer = arcpy.GetParameterAsText(0)
-    output_layer = arcpy.GetParameterAsText(1)
-    thread_count = arcpy.GetParameterAsText(2) or "Auto (Recommended)"
-    memory_allocation = arcpy.GetParameterAsText(3) or "Auto (Recommended)"
+    # Note: No input layer - Phase 2 processes predefined data sources from IMPORT_FIELDS.json
+    output_layer = arcpy.GetParameterAsText(0)
+    thread_count = arcpy.GetParameterAsText(1) or "Auto (Recommended)"
+    memory_allocation = arcpy.GetParameterAsText(2) or "Auto (Recommended)"
 
     # Log parameter values
-    arcpy.AddMessage(f"📥 Input Layer: {input_layer}")
     arcpy.AddMessage(f"📤 Output Layer: {output_layer}")
     arcpy.AddMessage(f"🧵 Thread Count: {thread_count}")
     arcpy.AddMessage(f"💾 Memory Allocation: {memory_allocation}")
@@ -460,10 +460,18 @@ def main():
         arcpy.AddMessage(f"📊 Progress: {percent:3d}% - {message}")
 
     try:
-        # Process the input layer
+        # Process predefined data sources from IMPORT_FIELDS.json
         arcpy.AddMessage("🔄 Starting basic data processing...")
 
-        processing_results = process_layer_basic(input_layer, progress_update)
+        # For Phase 2, use sample data from predefined sources
+        sample_data_path = os.path.join(
+            os.path.dirname(__file__),
+            "../../data/samples/import_dataset/import_dataset.csv",
+        )
+
+        arcpy.AddMessage(f"📁 Processing sample data: {sample_data_path}")
+
+        processing_results = process_layer_basic(sample_data_path, progress_update)
 
         # Report processing results
         if processing_results["processing_successful"]:
@@ -490,12 +498,12 @@ def main():
                 else:
                     arcpy.AddMessage("   • ✅ No null values in sample")
 
-            # For Phase 2, we'll create a simple copy of the input as output
+            # For Phase 2, we'll create a simple copy of the sample data as output
             # Future phases will add actual forest classification processing
             arcpy.AddMessage(
                 "📋 Creating output layer (Phase 2: Basic copy operation)..."
             )
-            arcpy.CopyFeatures_management(input_layer, output_layer)
+            arcpy.CopyFeatures_management(sample_data_path, output_layer)
             arcpy.AddMessage("✅ Output layer created successfully")
 
         else:
