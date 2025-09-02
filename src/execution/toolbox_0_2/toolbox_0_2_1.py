@@ -430,8 +430,91 @@ class ForestClassificationTool(object):
         arcpy.AddMessage("🧹 Phase 2 post-execution cleanup completed")
 
 
+def main():
+    """Main execution function for .atbx Script tool - Phase 2."""
+
+    # Immediate logging
+    arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.1")
+    arcpy.AddMessage("📋 Phase 2: Core Data Processing with basic field management")
+
+    # Extract Phase 2 parameters using GetParameterAsText
+    input_layer = arcpy.GetParameterAsText(0)
+    output_layer = arcpy.GetParameterAsText(1)
+    thread_count = arcpy.GetParameterAsText(2) or "Auto (Recommended)"
+    memory_allocation = arcpy.GetParameterAsText(3) or "Auto (Recommended)"
+
+    # Log parameter values
+    arcpy.AddMessage(f"📥 Input Layer: {input_layer}")
+    arcpy.AddMessage(f"📤 Output Layer: {output_layer}")
+    arcpy.AddMessage(f"🧵 Thread Count: {thread_count}")
+    arcpy.AddMessage(f"💾 Memory Allocation: {memory_allocation}")
+
+    # Log detected system capabilities
+    cpu_cores, total_memory_gb, available_memory_gb = get_system_capabilities()
+    arcpy.AddMessage(f"🖥️ System: {cpu_cores} CPU cores detected")
+    arcpy.AddMessage(f"💾 Available memory: {available_memory_gb:.1f} GB")
+
+    # Phase 2: Core Data Processing
+    def progress_update(percent, message):
+        """Helper function to update progress with 5% granularity."""
+        arcpy.AddMessage(f"📊 Progress: {percent:3d}% - {message}")
+
+    try:
+        # Process the input layer
+        arcpy.AddMessage("🔄 Starting basic data processing...")
+
+        processing_results = process_layer_basic(input_layer, progress_update)
+
+        # Report processing results
+        if processing_results["processing_successful"]:
+            arcpy.AddMessage("📈 Processing Results Summary:")
+            arcpy.AddMessage(
+                f"   • Layer: {processing_results.get('layer_path', 'Unknown')}"
+            )
+            arcpy.AddMessage(f"   • Fields found: {processing_results['field_count']}")
+            arcpy.AddMessage(
+                f"   • Features counted: {processing_results['feature_count']:,}"
+            )
+            arcpy.AddMessage(
+                f"   • Sample data points: {len(processing_results['sample_data'])}"
+            )
+
+            # Report data quality if available
+            if "data_quality" in processing_results:
+                quality = processing_results["data_quality"]
+                arcpy.AddMessage(
+                    f"   • Data quality: {quality['sample_size']} samples analyzed"
+                )
+                if quality.get("has_null_values"):
+                    arcpy.AddMessage("   • ⚠️  Contains null/missing values")
+                else:
+                    arcpy.AddMessage("   • ✅ No null values in sample")
+
+            # For Phase 2, we'll create a simple copy of the input as output
+            # Future phases will add actual forest classification processing
+            arcpy.AddMessage(
+                "📋 Creating output layer (Phase 2: Basic copy operation)..."
+            )
+            arcpy.CopyFeatures_management(input_layer, output_layer)
+            arcpy.AddMessage("✅ Output layer created successfully")
+
+        else:
+            arcpy.AddError("❌ Data processing failed - see messages above for details")
+            return
+
+        # Log completion
+        arcpy.AddMessage(
+            "✅ Forest Classification Tool - Phase 2 completed successfully!"
+        )
+        arcpy.AddMessage("🔮 Next Phase: Field Management and validation capabilities")
+
+    except Exception as e:
+        arcpy.AddError(f"❌ Tool execution failed: {e}")
+        import traceback
+
+        arcpy.AddError(f"📋 Error details: {traceback.format_exc()}")
+
+
 # Module-level execution for .atbx Script tools
 if __name__ == "__main__":
-    # This gets called when the script is run as a Script tool in ArcGIS Pro
-    arcpy.AddMessage("📋 Forest Classification Tool - Phase 2 script loaded")
-    arcpy.AddMessage("🔧 Ready for ArcGIS Pro .atbx Script tool execution")
+    main()

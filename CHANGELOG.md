@@ -5,6 +5,31 @@ All notable changes to the Forest Classification Tool single file implementation
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2025-09-02
+
+### Fixed
+
+- **ArcGIS Pro tool execution restored** - Added missing `main()` function for .atbx Script tool compatibility
+- **Rich emoji logging now functional** in ArcGIS Pro execution environment
+- **Parameter extraction implemented** using `arcpy.GetParameterAsText()` for all 4 Phase 2 parameters
+- **Core data processing bridge established** between .atbx Script tool and Phase 2 logic
+
+### Added
+
+- **Complete main() function** following Phase 1 proven pattern for .atbx Script tool execution
+- **Full parameter logging** with emoji indicators (📥 Input, 📤 Output, 🧵 Threads, 💾 Memory)
+- **System capabilities detection** with CPU core and memory reporting in ArcGIS Pro
+- **Progress tracking integration** with `process_layer_basic()` core functionality
+- **Error handling and reporting** with detailed traceback information in ArcGIS Pro
+
+### Technical Details
+
+- **9-step development workflow completed**: RESEARCH → SPECIFY → DESIGN → CODE → TEST → CLEANUP → DOCUMENT → HANDOFF
+- **Parameter mapping**: Input Layer (0), Output Layer (1), Thread Count (2), Memory Allocation (3)
+- **Module-level execution**: `if __name__ == "__main__": main()` enables .atbx Script tool integration
+- **Test validation**: All 93 tests passing with VS Code integrated test runner
+- **Phase 2 scope maintained**: Single-threaded data processing with basic field management
+
 ## [0.2.1] - 2025-09-02
 
 ### Added
