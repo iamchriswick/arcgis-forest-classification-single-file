@@ -1,9 +1,17 @@
+"""
+Filename: toolbox_0_2_5.py
+Description: Executes standalone operations, provides object-oriented functionality, integrates with arcgis pro tools, processes and transforms data, and handles errors and exceptions
+Author: iamchriswick
+Dependencies: arcpy, json, os, psutil, traceback
+Version: 1.0.1
+Created: 2025-09-02 20:04:01
+Last Updated: 2025-09-02 21:00:55
+Revision Notes: See project documentation for usage details
+"""
+
 # -*- coding: utf-8 -*-
 """
 Forest Classification Tool - Phase 2: Core Data Processing v0.2.5
-
-Created: 2025-08-29 11:30
-Version: 0.2.5
 
 Phase 2 Features:
 - All Phase 1 features (basic toolbox structure, parameters, system detection)
@@ -383,9 +391,11 @@ class ForestClassificationTool(object):
         """Execute method with basic data processing capabilities."""
         try:
             # Log tool start
-            arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.4")
             arcpy.AddMessage(
-                "📋 Phase 2: Core Data Processing with basic field management"
+                "🚀 Starting Forest Classification Tool - Phase 2 (v0.2.5)"
+            )
+            arcpy.AddMessage(
+                "📋 Phase 2: Core Data Processing with multi-source field mapping"
             )
 
             # Get parameters (3 params: output, thread, memory)
@@ -496,8 +506,8 @@ def main():
     """Main execution function for .atbx Script tool - Phase 2."""
 
     # Immediate logging
-    arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.4")
-    arcpy.AddMessage("📋 Phase 2: Core Data Processing with basic field management")
+    arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.5")
+    arcpy.AddMessage("📋 Phase 2: Core Data Processing with multi-source field mapping")
 
     # Extract Phase 2 parameters using GetParameterAsText (3 params: output, thread, memory)
     # Note: No input layer parameter - Phase 2 uses predefined data sources from IMPORT_FIELDS.json
@@ -704,7 +714,9 @@ def main():
                     except Exception as e:
                         arcpy.AddWarning(f"⚠️ Could not delete field {field}: {e}")
 
-                arcpy.AddMessage(f"✅ CUD operations completed: {len(fields_created)} created, {updated_count} records updated, {deleted_count} fields deleted")
+                arcpy.AddMessage(
+                    f"✅ CUD operations completed: {len(fields_created)} created, {updated_count} records updated, {deleted_count} fields deleted"
+                )
             else:
                 arcpy.AddMessage(
                     "📋 Output layer doesn't exist - creating from input..."
