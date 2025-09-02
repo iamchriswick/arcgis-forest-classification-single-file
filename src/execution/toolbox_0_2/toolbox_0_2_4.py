@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Forest Classification Tool - Phase 2: Core Data Processing v0.2.3
+Forest Classification Tool - Phase 2: Core Data Processing v0.2.4
 
 Created: 2025-08-29 11:30
-Version: 0.2.3
+Version: 0.2.4
 
 Phase 2 Features:
 - All Phase 1 features (basic toolbox structure, parameters, system detection)
@@ -11,6 +11,7 @@ Phase 2 Features:
 - Simple field management (field existence checking, basic type validation)
 - Single-threaded data processing with progress tracking (0-100%)
 - Error handling for missing files and basic data access issues
+- CUD (Create, Update, Delete) operations for field management
 
 Phase 2 Focus:
 - Implement basic data reading capabilities
@@ -19,6 +20,7 @@ Phase 2 Focus:
 - Basic field reading and writing
 - Simple progress tracking (0-100%)
 - Error handling for missing files
+- CUD operations on existing feature layers
 
 This is Phase 2 of a 13-phase incremental development strategy.
 Developed as part of the Single File Development Strategy for ArcGIS Pro Forest Classification Tool.
@@ -27,6 +29,8 @@ For ArcGIS Pro .atbx Script tools, the script executes at module level when call
 ToolValidator dropdown UI is controlled by the .atbx Properties → Validation.
 
 Version History:
+Phase 2 Change Log:
+- v0.2.4: Implemented proper CUD (Create, Update, Delete) field operations for existing layers
 - v0.2.3: Fixed parameter alignment with .atbx tool (3 params: output, thread, memory)
 - v0.2.2: Added main() function for .atbx Script tool execution
 - v0.2.1: Initial Phase 2 implementation with basic data processing capabilities
@@ -338,7 +342,7 @@ class ForestClassificationTool(object):
         """Execute method with basic data processing capabilities."""
         try:
             # Log tool start
-            arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.3")
+            arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.4")
             arcpy.AddMessage(
                 "📋 Phase 2: Core Data Processing with basic field management"
             )
@@ -451,7 +455,7 @@ def main():
     """Main execution function for .atbx Script tool - Phase 2."""
 
     # Immediate logging
-    arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.3")
+    arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.4")
     arcpy.AddMessage("📋 Phase 2: Core Data Processing with basic field management")
 
     # Extract Phase 2 parameters using GetParameterAsText (3 params: output, thread, memory)
@@ -550,29 +554,126 @@ def main():
                 )
 
                 # CREATE: Add missing fields
+                fields_created = []
                 for field in target_fields:
                     if field not in existing_fields:
                         arcpy.AddMessage(f"➕ Creating field: {field}")
                         arcpy.AddField_management(
                             output_path, field, "DOUBLE", field_alias=field
                         )
+                        fields_created.append(field)
 
-                # UPDATE: Fields already exist - values will be updated in future phases
-                existing_target_fields = [
-                    f for f in target_fields if f in existing_fields
+                # UPDATE: Actually update field values from input data
+                all_target_fields = [
+                    f
+                    for f in target_fields
+                    if f in existing_fields or f in fields_created
                 ]
-                if existing_target_fields:
+                updated_count = 0  # Initialize counter
+                if all_target_fields:
                     arcpy.AddMessage(
-                        f"🔄 Fields ready for update: {', '.join(existing_target_fields)}"
+                        f"🔄 Updating field values from input data for: {', '.join(all_target_fields)}"
                     )
+
+                    # Create field mapping for data transfer
+                    field_mappings = []
+                    for field in all_target_fields:
+                        # Map from source field name in input layer to target field in output
+                        source_field = field  # Same field name in both layers
+                        if source_field in [
+                            f.name for f in arcpy.ListFields(input_feature_layer)
+                        ]:
+                            field_mappings.append(f"{source_field} {field}")
+                            arcpy.AddMessage(f"  📊 Mapping: {source_field} → {field}")
+
+                    if field_mappings:
+                        # Use UpdateCursor to transfer values row by row
+                        arcpy.AddMessage("📋 Starting field value updates...")
+
+                        # Create dictionary to store input data values by geometry/ObjectID
+                        input_data = {}
+                        with arcpy.da.SearchCursor(
+                            input_feature_layer,
+                            ["OBJECTID", "SHAPE@"] + all_target_fields,
+                        ) as search_cursor:
+                            for row in search_cursor:
+                                oid = row[0]
+                                geom = row[1]
+                                values = row[2:]  # Field values
+                                input_data[oid] = {
+                                    "geometry": geom,
+                                    "values": dict(zip(all_target_fields, values)),
+                                }
+
+                        arcpy.AddMessage(
+                            f"📊 Read {len(input_data)} records from input layer"
+                        )
+
+                        # Update output layer with input data values
+                        updated_count = 0
+                        with arcpy.da.UpdateCursor(
+                            output_path, ["OBJECTID", "SHAPE@"] + all_target_fields
+                        ) as update_cursor:
+                            for row in update_cursor:
+                                output_oid = row[0]
+                                output_geom = row[1]
+
+                                # Find matching input record (by ObjectID first, then by spatial proximity)
+                                matching_input = None
+                                if output_oid in input_data:
+                                    matching_input = input_data[output_oid]
+                                else:
+                                    # Find spatially closest record
+                                    min_distance = float("inf")
+                                    for input_oid, input_record in input_data.items():
+                                        try:
+                                            distance = output_geom.distanceTo(
+                                                input_record["geometry"]
+                                            )
+                                            if distance < min_distance:
+                                                min_distance = distance
+                                                matching_input = input_record
+                                        except Exception:
+                                            continue
+
+                                if matching_input:
+                                    # Update the row with new values
+                                    updated_row = list(row)  # Copy existing row
+                                    for i, field in enumerate(all_target_fields):
+                                        field_index = 2 + i  # Skip OBJECTID and SHAPE@
+                                        new_value = matching_input["values"][field]
+                                        if (
+                                            new_value is not None
+                                        ):  # Only update non-null values
+                                            updated_row[field_index] = new_value
+
+                                    update_cursor.updateRow(updated_row)
+                                    updated_count += 1
+
+                        arcpy.AddMessage(
+                            f"✅ Updated {updated_count} records with new field values"
+                        )
+                    else:
+                        arcpy.AddMessage(
+                            "⚠️ No matching fields found between input and output layers"
+                        )
+                else:
+                    arcpy.AddMessage("ℹ️ No fields to update")
 
                 # DELETE: Remove fields not in our target schema
                 fields_to_delete = [f for f in user_fields if f not in target_fields]
+                deleted_count = 0
                 for field in fields_to_delete:
-                    arcpy.AddMessage(f"🗑️ Deleting field: {field}")
-                    arcpy.DeleteField_management(output_path, field)
+                    try:
+                        arcpy.AddMessage(f"🗑️ Deleting field: {field}")
+                        arcpy.DeleteField_management(output_path, field)
+                        deleted_count += 1
+                    except Exception as e:
+                        arcpy.AddWarning(f"⚠️ Could not delete field {field}: {e}")
 
-                arcpy.AddMessage("✅ CUD operations completed successfully")
+                arcpy.AddMessage(
+                    f"✅ CUD operations completed: {len(fields_created)} created, {updated_count} records updated, {deleted_count} fields deleted"
+                )
             else:
                 arcpy.AddMessage(
                     "📋 Output layer doesn't exist - creating from input..."
