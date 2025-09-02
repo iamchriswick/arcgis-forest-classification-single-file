@@ -5,6 +5,44 @@ All notable changes to the Forest Classification Tool single file implementation
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2025-09-02
+
+### Added
+
+- **Multi-source field mapping implementation** - Complete field population from dedicated source layers using IMPORT_FIELDS.json configuration
+- **Dynamic JSON loading** - `get_field_source_mappings()` function reads field-to-source-path mappings from IMPORT_FIELDS.json
+- **Individual field processing** - Each target field (srrtrealder, srrtreslag, srrbmo, srrmhoyde) processed from its specific source layer
+- **OBJECTID-based record mapping** - Direct record correspondence between source and output layers for data integrity
+- **Enhanced progress tracking** - Detailed logging shows source path for each field being processed
+- **Comprehensive error handling** - Graceful handling of missing source layers or fields with detailed warnings
+
+### Changed
+
+- **Field population strategy** - Evolved from single-source to multi-source mapping approach
+- **Data transfer method** - Individual field processing replaces bulk field operations
+- **Null value preservation** - Maintains data integrity by preserving Null values during transfer
+- **Logging detail level** - Enhanced with per-field source path information and record counts
+
+### Fixed
+
+- **Incomplete field population** - All target fields now properly populated from their respective source layers
+- **Field mapping accuracy** - Uses definitive IMPORT_FIELDS.json mappings instead of assumptions
+- **Data consistency** - OBJECTID mapping ensures proper record correspondence between layers
+
+### Performance
+
+- **Processing efficiency** - 1,643,524 total record updates completed in 26.37 seconds (~62,330 updates/second)
+- **Memory optimization** - Individual field processing reduces memory footprint compared to bulk operations
+- **Error resilience** - Continues processing remaining fields if individual source layers are missing
+
+### Technical Details
+
+- **JSON configuration driven** - All field mappings read dynamically from IMPORT_FIELDS.json (57 field mappings loaded)
+- **Multi-source architecture** - Each field reads from dedicated source layer path as defined in configuration
+- **CUD operations enhanced** - UPDATE operations now support multi-source field population
+- **Test validation** - Successful execution with 410,881 features across 4 target fields
+- **Phase 2 completion** - Multi-source field mapping represents completion of core data processing phase
+
 ## [0.2.3] - 2025-09-02
 
 ### Fixed

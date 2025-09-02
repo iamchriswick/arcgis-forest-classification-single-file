@@ -1,9 +1,17 @@
+"""
+Filename: toolbox_0_2_5.py
+Description: Executes standalone operations, provides object-oriented functionality, integrates with arcgis pro tools, processes and transforms data, and handles errors and exceptions
+Author: iamchriswick
+Dependencies: arcpy, json, os, psutil, traceback
+Version: 1.0.1
+Created: 2025-09-02 20:04:01
+Last Updated: 2025-09-02 21:00:55
+Revision Notes: See project documentation for usage details
+"""
+
 # -*- coding: utf-8 -*-
 """
-Forest Classification Tool - Phase 2: Core Data Processing v0.2.3
-
-Created: 2025-08-29 11:30
-Version: 0.2.3
+Forest Classification Tool - Phase 2: Core Data Processing v0.2.5
 
 Phase 2 Features:
 - All Phase 1 features (basic toolbox structure, parameters, system detection)
@@ -11,6 +19,7 @@ Phase 2 Features:
 - Simple field management (field existence checking, basic type validation)
 - Single-threaded data processing with progress tracking (0-100%)
 - Error handling for missing files and basic data access issues
+- CUD (Create, Update, Delete) operations for field management
 
 Phase 2 Focus:
 - Implement basic data reading capabilities
@@ -19,6 +28,7 @@ Phase 2 Focus:
 - Basic field reading and writing
 - Simple progress tracking (0-100%)
 - Error handling for missing files
+- CUD operations on existing feature layers
 
 This is Phase 2 of a 13-phase incremental development strategy.
 Developed as part of the Single File Development Strategy for ArcGIS Pro Forest Classification Tool.
@@ -27,12 +37,55 @@ For ArcGIS Pro .atbx Script tools, the script executes at module level when call
 ToolValidator dropdown UI is controlled by the .atbx Properties → Validation.
 
 Version History:
+Phase 2 Change Log:
+- v0.2.5: Implemented multi-source field mapping from IMPORT_FIELDS.json for complete data population
+- v0.2.4: Implemented proper CUD (Create, Update, Delete) field operations for existing layers
 - v0.2.3: Fixed parameter alignment with .atbx tool (3 params: output, thread, memory)
 - v0.2.2: Added main() function for .atbx Script tool execution
 - v0.2.1: Initial Phase 2 implementation with basic data processing capabilities
 """
 
 import arcpy
+import json
+import os
+
+
+def get_field_source_mappings():
+    """Load IMPORT_FIELDS.json and create field-to-source-path mappings.
+
+    Returns:
+        dict: Mapping of field names to their source layer paths
+    """
+    try:
+        # Get the path to IMPORT_FIELDS.json relative to this script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        import_fields_path = os.path.join(
+            script_dir, "..", "..", "..", "data", "IMPORT_FIELDS.json"
+        )
+
+        arcpy.AddMessage(f"📋 Loading field mappings from: {import_fields_path}")
+
+        with open(import_fields_path, "r") as f:
+            import_fields = json.load(f)
+
+        # Create field name to source path mapping
+        field_mappings = {}
+        for category_name, category_data in import_fields.get(
+            "field_categories", {}
+        ).items():
+            for field_name, field_data in category_data.get("fields", {}).items():
+                source_path = field_data.get("path", "")
+                if source_path:
+                    field_mappings[field_name] = source_path
+
+        arcpy.AddMessage(
+            f"📊 Loaded {len(field_mappings)} field mappings from IMPORT_FIELDS.json"
+        )
+        return field_mappings
+
+    except Exception as e:
+        arcpy.AddWarning(f"⚠️ Could not load IMPORT_FIELDS.json: {e}")
+        return {}
 
 
 def get_system_capabilities():
@@ -338,9 +391,11 @@ class ForestClassificationTool(object):
         """Execute method with basic data processing capabilities."""
         try:
             # Log tool start
-            arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.3")
             arcpy.AddMessage(
-                "📋 Phase 2: Core Data Processing with basic field management"
+                "🚀 Starting Forest Classification Tool - Phase 2 (v0.2.5)"
+            )
+            arcpy.AddMessage(
+                "📋 Phase 2: Core Data Processing with multi-source field mapping"
             )
 
             # Get parameters (3 params: output, thread, memory)
@@ -451,8 +506,8 @@ def main():
     """Main execution function for .atbx Script tool - Phase 2."""
 
     # Immediate logging
-    arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.3")
-    arcpy.AddMessage("📋 Phase 2: Core Data Processing with basic field management")
+    arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.5")
+    arcpy.AddMessage("📋 Phase 2: Core Data Processing with multi-source field mapping")
 
     # Extract Phase 2 parameters using GetParameterAsText (3 params: output, thread, memory)
     # Note: No input layer parameter - Phase 2 uses predefined data sources from IMPORT_FIELDS.json
@@ -550,29 +605,118 @@ def main():
                 )
 
                 # CREATE: Add missing fields
+                fields_created = []
                 for field in target_fields:
                     if field not in existing_fields:
                         arcpy.AddMessage(f"➕ Creating field: {field}")
                         arcpy.AddField_management(
                             output_path, field, "DOUBLE", field_alias=field
                         )
+                        fields_created.append(field)
 
-                # UPDATE: Fields already exist - values will be updated in future phases
-                existing_target_fields = [
-                    f for f in target_fields if f in existing_fields
+                # UPDATE: Multi-source field mapping using IMPORT_FIELDS.json
+                all_target_fields = [
+                    f
+                    for f in target_fields
+                    if f in existing_fields or f in fields_created
                 ]
-                if existing_target_fields:
+                updated_count = 0  # Initialize counter
+
+                if all_target_fields:
+                    # Load field mappings from IMPORT_FIELDS.json
+                    field_mappings = get_field_source_mappings()
+
                     arcpy.AddMessage(
-                        f"🔄 Fields ready for update: {', '.join(existing_target_fields)}"
+                        f"🔄 Processing {len(all_target_fields)} target fields with multi-source mapping"
                     )
+
+                    # Process each target field individually from its source layer
+                    for field_name in all_target_fields:
+                        if field_name in field_mappings:
+                            source_path = field_mappings[field_name]
+                            arcpy.AddMessage(
+                                f"📊 Processing {field_name} from: {source_path}"
+                            )
+
+                            try:
+                                # Check if source layer exists and has the field
+                                if arcpy.Exists(source_path):
+                                    source_fields = [
+                                        f.name for f in arcpy.ListFields(source_path)
+                                    ]
+                                    if field_name in source_fields:
+                                        # Read data from source layer
+                                        source_data = {}
+                                        with arcpy.da.SearchCursor(
+                                            source_path, ["OBJECTID", field_name]
+                                        ) as search_cursor:
+                                            for row in search_cursor:
+                                                oid = row[0]
+                                                value = row[1]
+                                                source_data[oid] = value
+
+                                        arcpy.AddMessage(
+                                            f"  📋 Read {len(source_data)} records from {source_path}"
+                                        )
+
+                                        # Update output layer field
+                                        field_updated_count = 0
+                                        with arcpy.da.UpdateCursor(
+                                            output_path, ["OBJECTID", field_name]
+                                        ) as update_cursor:
+                                            for row in update_cursor:
+                                                output_oid = row[0]
+                                                if output_oid in source_data:
+                                                    # Update with value from source (preserving Null)
+                                                    new_value = source_data[output_oid]
+                                                    updated_row = [
+                                                        output_oid,
+                                                        new_value,
+                                                    ]
+                                                    update_cursor.updateRow(updated_row)
+                                                    field_updated_count += 1
+
+                                        arcpy.AddMessage(
+                                            f"  ✅ Updated {field_updated_count} records for {field_name}"
+                                        )
+                                        updated_count += field_updated_count
+                                    else:
+                                        arcpy.AddWarning(
+                                            f"  ⚠️ Field {field_name} not found in source layer {source_path}"
+                                        )
+                                else:
+                                    arcpy.AddWarning(
+                                        f"  ⚠️ Source layer not found: {source_path}"
+                                    )
+                            except Exception as e:
+                                arcpy.AddWarning(
+                                    f"  ❌ Error processing {field_name}: {e}"
+                                )
+                        else:
+                            arcpy.AddWarning(
+                                f"  ⚠️ No source mapping found for field: {field_name}"
+                            )
+
+                    arcpy.AddMessage(
+                        f"✅ Multi-source field mapping completed: {updated_count} total record updates"
+                    )
+                else:
+                    arcpy.AddMessage("ℹ️ No target fields to update")
 
                 # DELETE: Remove fields not in our target schema
                 fields_to_delete = [f for f in user_fields if f not in target_fields]
+                deleted_count = 0
                 for field in fields_to_delete:
-                    arcpy.AddMessage(f"🗑️ Deleting field: {field}")
-                    arcpy.DeleteField_management(output_path, field)
+                    try:
+                        arcpy.AddMessage(f"🗑️ Deleting field: {field}")
+                        arcpy.DeleteField_management(output_path, field)
+                        deleted_count += 1
+                    except Exception as e:
+                        arcpy.AddWarning(f"⚠️ Could not delete field {field}: {e}")
 
-                arcpy.AddMessage("✅ CUD operations completed successfully")
+                arcpy.AddMessage(
+                    f"✅ CUD operations completed: {len(fields_created)} created, {updated_count} records updated, {deleted_count} fields deleted"
+                )
             else:
                 arcpy.AddMessage(
                     "📋 Output layer doesn't exist - creating from input..."
