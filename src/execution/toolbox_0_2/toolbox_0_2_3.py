@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Forest Classification Tool - Phase 2: Core Data Processing v0.2.1
+Forest Classification Tool - Phase 2: Core Data Processing v0.2.3
 
 Created: 2025-08-29 11:30
-Version: 0.2.1
+Version: 0.2.3
 
 Phase 2 Features:
 - All Phase 1 features (basic toolbox structure, parameters, system detection)
@@ -27,10 +27,13 @@ For ArcGIS Pro .atbx Script tools, the script executes at module level when call
 ToolValidator dropdown UI is controlled by the .atbx Properties → Validation.
 
 Version History:
+- v0.2.3: Fixed parameter alignment with .atbx tool (3 params: output, thread, memory)
+- v0.2.2: Added main() function for .atbx Script tool execution
 - v0.2.1: Initial Phase 2 implementation with basic data processing capabilities
 """
 
 import arcpy
+import os
 
 
 def get_system_capabilities():
@@ -286,15 +289,7 @@ class ForestClassificationTool(object):
 
     def getParameterInfo(self):
         """Define parameter definitions for .atbx Script tool."""
-
-        # Input Feature Layer
-        input_layer = arcpy.Parameter(
-            displayName="Input Feature Layer",
-            name="input_layer",
-            datatype="GPFeatureLayer",
-            parameterType="Required",
-            direction="Input",
-        )
+        # Phase 2.3: 3 parameters (no input layer - uses predefined data sources)
 
         # Output Feature Layer
         output_layer = arcpy.Parameter(
@@ -325,7 +320,8 @@ class ForestClassificationTool(object):
         )
         memory_allocation.value = "Auto (Recommended)"
 
-        return [input_layer, output_layer, thread_count, memory_allocation]
+        # Phase 2.3: Return only 3 parameters (no input layer needed)
+        return [output_layer, thread_count, memory_allocation]
 
     def isLicensed(self):
         """Set whether tool is licensed to execute."""
@@ -348,27 +344,33 @@ class ForestClassificationTool(object):
                 "📋 Phase 2: Core Data Processing with basic field management"
             )
 
-            # Get parameters
-            input_layer = parameters[0].valueAsText
-            output_layer = parameters[1].valueAsText
-            thread_count = parameters[2].valueAsText or "Auto (Recommended)"
-            memory_allocation = parameters[3].valueAsText or "Auto (Recommended)"
+            # Get parameters (3 params: output, thread, memory)
+            # Note: No input layer parameter - Phase 2 uses predefined data sources
+            output_layer = parameters[0].valueAsText
+            thread_count = parameters[1].valueAsText or "Auto (Recommended)"
+            memory_allocation = parameters[2].valueAsText or "Auto (Recommended)"
+
+            # Set up sample data path
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            sample_data_path = os.path.join(
+                current_dir, "../../data/samples/import_dataset/Grid_8m_Sample.shp"
+            )
 
             # Log parameter values
-            arcpy.AddMessage(f"📥 Input Layer: {input_layer}")
             arcpy.AddMessage(f"📤 Output Layer: {output_layer}")
             arcpy.AddMessage(f"🧵 Thread Count: {thread_count}")
             arcpy.AddMessage(f"💾 Memory Allocation: {memory_allocation}")
+            arcpy.AddMessage(f"📁 Sample Data: {sample_data_path}")
 
             # Phase 2: Core Data Processing
             def progress_update(percent, message):
                 """Helper function to update progress with 5% granularity."""
                 arcpy.AddMessage(f"📊 Progress: {percent:3d}% - {message}")
 
-            # Process the input layer
+            # Process the sample data layer
             arcpy.AddMessage("🔄 Starting basic data processing...")
 
-            processing_results = process_layer_basic(input_layer, progress_update)
+            processing_results = process_layer_basic(sample_data_path, progress_update)
 
             # Report processing results
             if processing_results["processing_successful"]:
@@ -397,12 +399,12 @@ class ForestClassificationTool(object):
                     else:
                         arcpy.AddMessage("   • ✅ No null values in sample")
 
-                # For Phase 2, we'll create a simple copy of the input as output
+                # For Phase 2, we'll create a simple copy of the sample data as output
                 # Future phases will add actual forest classification processing
                 arcpy.AddMessage(
                     "📋 Creating output layer (Phase 2: Basic copy operation)..."
                 )
-                arcpy.CopyFeatures_management(input_layer, output_layer)
+                arcpy.CopyFeatures_management(sample_data_path, output_layer)
                 arcpy.AddMessage("✅ Output layer created successfully")
 
             else:
@@ -434,20 +436,26 @@ def main():
     """Main execution function for .atbx Script tool - Phase 2."""
 
     # Immediate logging
-    arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.1")
+    arcpy.AddMessage("🚀 Starting Forest Classification Tool - Phase 2 v0.2.3")
     arcpy.AddMessage("📋 Phase 2: Core Data Processing with basic field management")
 
-    # Extract Phase 2 parameters using GetParameterAsText
-    input_layer = arcpy.GetParameterAsText(0)
-    output_layer = arcpy.GetParameterAsText(1)
-    thread_count = arcpy.GetParameterAsText(2) or "Auto (Recommended)"
-    memory_allocation = arcpy.GetParameterAsText(3) or "Auto (Recommended)"
+    # Extract Phase 2 parameters using GetParameterAsText (3 params: output, thread, memory)
+    # Note: No input layer parameter - Phase 2 uses predefined data sources from IMPORT_FIELDS.json
+    output_layer = arcpy.GetParameterAsText(0)
+    thread_count = arcpy.GetParameterAsText(1) or "Auto (Recommended)"
+    memory_allocation = arcpy.GetParameterAsText(2) or "Auto (Recommended)"
+
+    # Set up sample data path for Phase 2 processing
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    sample_data_path = os.path.join(
+        current_dir, "../../data/samples/import_dataset/Grid_8m_Sample.shp"
+    )
 
     # Log parameter values
-    arcpy.AddMessage(f"📥 Input Layer: {input_layer}")
     arcpy.AddMessage(f"📤 Output Layer: {output_layer}")
     arcpy.AddMessage(f"🧵 Thread Count: {thread_count}")
     arcpy.AddMessage(f"💾 Memory Allocation: {memory_allocation}")
+    arcpy.AddMessage(f"📁 Sample Data: {sample_data_path}")
 
     # Log detected system capabilities
     cpu_cores, total_memory_gb, available_memory_gb = get_system_capabilities()
@@ -460,10 +468,10 @@ def main():
         arcpy.AddMessage(f"📊 Progress: {percent:3d}% - {message}")
 
     try:
-        # Process the input layer
+        # Process the sample data layer
         arcpy.AddMessage("🔄 Starting basic data processing...")
 
-        processing_results = process_layer_basic(input_layer, progress_update)
+        processing_results = process_layer_basic(sample_data_path, progress_update)
 
         # Report processing results
         if processing_results["processing_successful"]:
@@ -490,12 +498,12 @@ def main():
                 else:
                     arcpy.AddMessage("   • ✅ No null values in sample")
 
-            # For Phase 2, we'll create a simple copy of the input as output
+            # For Phase 2, we'll create a simple copy of the sample data as output
             # Future phases will add actual forest classification processing
             arcpy.AddMessage(
                 "📋 Creating output layer (Phase 2: Basic copy operation)..."
             )
-            arcpy.CopyFeatures_management(input_layer, output_layer)
+            arcpy.CopyFeatures_management(sample_data_path, output_layer)
             arcpy.AddMessage("✅ Output layer created successfully")
 
         else:
