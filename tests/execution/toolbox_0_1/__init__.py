@@ -1,5 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
+# -*- coding: utf-8 -*-# -*- coding: utf-8 -*-
+
+(
+    """Phase 1 execution tests"""
+    """
 Phase 1 Execution Tests
 
 Tests for Phase 1 toolbox implementations focusing on:
@@ -11,6 +14,7 @@ Tests for Phase 1 toolbox implementations focusing on:
 
 Test files cover different iterations within Phase 1 (toolbox_0_1_1.py, toolbox_0_1_12.py, etc.)
 """
+)
 
 import unittest
 

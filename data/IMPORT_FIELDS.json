@@ -1,0 +1,469 @@
+{
+  "metadata": {
+    "title": "Import Fields",
+    "description": "Documents field definitions and data structure mappings",
+    "author": "iamchriswick",
+    "version": "1.0.1",
+    "created": "2025-08-25 02:00:00",
+    "updated": "2025-09-02 08:30:00",
+    "revision_notes": "Converted from markdown to JSON format for programmatic access"
+  },
+  "input_datasets": {
+    "Grid_8m_SR16_Dataset": {
+      "description": "Forest inventory data from SR16 dataset",
+      "type": "raster_dataset",
+      "field_count": 47,
+      "categories": [
+        "age_data",
+        "species_type",
+        "biomass",
+        "volume",
+        "height",
+        "site_index",
+        "diameter",
+        "basal_area",
+        "tree_density",
+        "leaf_area_index",
+        "crown_coverage"
+      ]
+    },
+    "Grid_8m_AR5_Dataset": {
+      "description": "Soil properties data from AR5 dataset",
+      "type": "raster_dataset",
+      "field_count": 3,
+      "categories": ["soil_properties"]
+    },
+    "Grid_8m_Dataset": {
+      "description": "General grid dataset containing elevation and location data",
+      "type": "raster_dataset",
+      "field_count": 5,
+      "categories": ["elevation", "location"]
+    }
+  },
+  "field_categories": {
+    "age_data": {
+      "description": "Forest stand age and harvest information",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrhogstaar": {
+          "description": "Harvest year",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrhogstaar",
+          "type": "year"
+        },
+        "srrtrealder": {
+          "description": "Stand age",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtrealder",
+          "type": "years"
+        },
+        "srrtrealder_l": {
+          "description": "Stand age lower bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtrealder_l",
+          "type": "years"
+        },
+        "srrtrealder_u": {
+          "description": "Stand age upper bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtrealder_u",
+          "type": "years"
+        }
+      }
+    },
+    "species_type": {
+      "description": "Dominant tree species classification",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrtreslag": {
+          "description": "Dominant species",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreslag",
+          "type": "classification"
+        }
+      }
+    },
+    "biomass": {
+      "description": "Above and below-ground biomass measurements",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrbmo": {
+          "description": "Above-ground biomass (t/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrbmo",
+          "type": "t_per_ha",
+          "unit": "tonnes per hectare"
+        },
+        "srrbmo_l": {
+          "description": "Above-ground biomass lower bound (t/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrbmo_l",
+          "type": "t_per_ha",
+          "unit": "tonnes per hectare"
+        },
+        "srrbmo_u": {
+          "description": "Above-ground biomass upper bound (t/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrbmo_u",
+          "type": "t_per_ha",
+          "unit": "tonnes per hectare"
+        },
+        "srrbmu": {
+          "description": "Below-ground biomass (t/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrbmu",
+          "type": "t_per_ha",
+          "unit": "tonnes per hectare"
+        },
+        "srrbmu_l": {
+          "description": "Below-ground biomass lower bound (t/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrbmu_l",
+          "type": "t_per_ha",
+          "unit": "tonnes per hectare"
+        },
+        "srrbmu_u": {
+          "description": "Below-ground biomass upper bound (t/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrbmu_u",
+          "type": "t_per_ha",
+          "unit": "tonnes per hectare"
+        }
+      }
+    },
+    "volume": {
+      "description": "Wood volume measurements over and under bark",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrvolmb": {
+          "description": "Volume over bark (m³/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrvolmb",
+          "type": "m3_per_ha",
+          "unit": "cubic meters per hectare"
+        },
+        "srrvolmb_l": {
+          "description": "Volume over bark lower bound (m³/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrvolmb_l",
+          "type": "m3_per_ha",
+          "unit": "cubic meters per hectare"
+        },
+        "srrvolmb_u": {
+          "description": "Volume over bark upper bound (m³/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrvolmb_u",
+          "type": "m3_per_ha",
+          "unit": "cubic meters per hectare"
+        },
+        "srrvolub": {
+          "description": "Volume under bark (m³/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrvolub",
+          "type": "m3_per_ha",
+          "unit": "cubic meters per hectare"
+        },
+        "srrvolub_l": {
+          "description": "Volume under bark lower bound (m³/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrvolub_l",
+          "type": "m3_per_ha",
+          "unit": "cubic meters per hectare"
+        },
+        "srrvolub_u": {
+          "description": "Volume under bark upper bound (m³/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrvolub_u",
+          "type": "m3_per_ha",
+          "unit": "cubic meters per hectare"
+        }
+      }
+    },
+    "height": {
+      "description": "Tree height measurements",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrmhoyde": {
+          "description": "Mean height (m)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrmhoyde",
+          "type": "meters",
+          "unit": "meters"
+        },
+        "srrmhoyde_l": {
+          "description": "Mean height lower bound (m)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrmhoyde_l",
+          "type": "meters",
+          "unit": "meters"
+        },
+        "srrmhoyde_u": {
+          "description": "Mean height upper bound (m)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrmhoyde_u",
+          "type": "meters",
+          "unit": "meters"
+        },
+        "srrohoyde": {
+          "description": "Top height (m)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrohoyde",
+          "type": "meters",
+          "unit": "meters"
+        },
+        "srrohoyde_l": {
+          "description": "Top height lower bound (m)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrohoyde_l",
+          "type": "meters",
+          "unit": "meters"
+        },
+        "srrohoyde_u": {
+          "description": "Top height upper bound (m)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrohoyde_u",
+          "type": "meters",
+          "unit": "meters"
+        }
+      }
+    },
+    "site_index": {
+      "description": "Forest site productivity index",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrbonitet": {
+          "description": "Site index (bonitet)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrbonitet",
+          "type": "classification"
+        }
+      }
+    },
+    "diameter": {
+      "description": "Tree diameter at breast height measurements",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrdiammiddel": {
+          "description": "Mean DBH (cm)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrdiammiddel",
+          "type": "centimeters",
+          "unit": "centimeters"
+        },
+        "srrdiammiddel_l": {
+          "description": "Mean DBH lower bound (cm)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrdiammiddel_l",
+          "type": "centimeters",
+          "unit": "centimeters"
+        },
+        "srrdiammiddel_u": {
+          "description": "Mean DBH upper bound (cm)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrdiammiddel_u",
+          "type": "centimeters",
+          "unit": "centimeters"
+        },
+        "srrdiammiddel_ge8": {
+          "description": "Mean DBH ≥ 8 cm (cm)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrdiammiddel_ge8",
+          "type": "centimeters",
+          "unit": "centimeters"
+        },
+        "srrdiammiddel_ge8_l": {
+          "description": "Mean DBH ≥ 8 cm lower bound (cm)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrdiammiddel_ge8_l",
+          "type": "centimeters",
+          "unit": "centimeters"
+        },
+        "srrdiammiddel_ge8_u": {
+          "description": "Mean DBH ≥ 8 cm upper bound (cm)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrdiammiddel_ge8_u",
+          "type": "centimeters",
+          "unit": "centimeters"
+        }
+      }
+    },
+    "basal_area": {
+      "description": "Tree basal area measurements",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrgrflate": {
+          "description": "Basal area (m²/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrgrflate",
+          "type": "m2_per_ha",
+          "unit": "square meters per hectare"
+        },
+        "srrgrflate_l": {
+          "description": "Basal area lower bound (m²/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrgrflate_l",
+          "type": "m2_per_ha",
+          "unit": "square meters per hectare"
+        },
+        "srrgrflate_u": {
+          "description": "Basal area upper bound (m²/ha)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrgrflate_u",
+          "type": "m2_per_ha",
+          "unit": "square meters per hectare"
+        }
+      }
+    },
+    "tree_density": {
+      "description": "Tree density measurements by diameter class",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrtreantall": {
+          "description": "Trees per hectare (all)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_l": {
+          "description": "Trees per hectare lower bound (all)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_l",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_u": {
+          "description": "Trees per hectare upper bound (all)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_u",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_ge8": {
+          "description": "Trees per hectare ≥ 8 cm DBH",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_ge8",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_ge8_l": {
+          "description": "Trees per hectare ≥ 8 cm lower bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_ge8_l",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_ge8_u": {
+          "description": "Trees per hectare ≥ 8 cm upper bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_ge8_u",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_ge10": {
+          "description": "Trees per hectare ≥ 10 cm DBH",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_ge10",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_ge10_l": {
+          "description": "Trees per hectare ≥ 10 cm lower bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_ge10_l",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_ge10_u": {
+          "description": "Trees per hectare ≥ 10 cm upper bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_ge10_u",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_ge16": {
+          "description": "Trees per hectare ≥ 16 cm DBH",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_ge16",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_ge16_l": {
+          "description": "Trees per hectare ≥ 16 cm lower bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_ge16_l",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        },
+        "srrtreantall_ge16_u": {
+          "description": "Trees per hectare ≥ 16 cm upper bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrtreantall_ge16_u",
+          "type": "trees_per_ha",
+          "unit": "trees per hectare"
+        }
+      }
+    },
+    "leaf_area_index": {
+      "description": "Leaf area index measurements",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrlai": {
+          "description": "Leaf Area Index",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrlai",
+          "type": "index"
+        },
+        "srrlai_l": {
+          "description": "Leaf Area Index lower bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrlai_l",
+          "type": "index"
+        },
+        "srrlai_u": {
+          "description": "Leaf Area Index upper bound",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrlai_u",
+          "type": "index"
+        }
+      }
+    },
+    "crown_coverage": {
+      "description": "Forest crown coverage percentage",
+      "dataset": "Grid_8m_SR16_Dataset",
+      "fields": {
+        "srrkronedek": {
+          "description": "Crown coverage (%)",
+          "path": "Grid_8m_SR16_Dataset/Grid_8m_SR16_srrkronedek",
+          "type": "percentage",
+          "unit": "percent"
+        }
+      }
+    },
+    "elevation": {
+      "description": "Elevation statistics for the area",
+      "dataset": "Grid_8m_Dataset",
+      "fields": {
+        "elev_min": {
+          "description": "Minimum elevation (m)",
+          "path": "Grid_8m_Dataset/Grid_8m_Elevation",
+          "type": "meters",
+          "unit": "meters"
+        },
+        "elev_mean": {
+          "description": "Mean elevation (m)",
+          "path": "Grid_8m_Dataset/Grid_8m_Elevation",
+          "type": "meters",
+          "unit": "meters"
+        },
+        "elev_max": {
+          "description": "Maximum elevation (m)",
+          "path": "Grid_8m_Dataset/Grid_8m_Elevation",
+          "type": "meters",
+          "unit": "meters"
+        }
+      }
+    },
+    "soil_properties": {
+      "description": "Soil classification and moisture characteristics",
+      "dataset": "Grid_8m_AR5_Dataset",
+      "fields": {
+        "markfukt": {
+          "description": "Soil moisture classification",
+          "path": "Grid_8m_AR5_Dataset/Grid_8m_AR5_markfukt",
+          "type": "classification"
+        },
+        "artype": {
+          "description": "Soil type classification",
+          "path": "Grid_8m_AR5_Dataset/Grid_8m_AR5_artype",
+          "type": "classification"
+        },
+        "argrunnf": {
+          "description": "Soil depth / foundation",
+          "path": "Grid_8m_AR5_Dataset/Grid_8m_AR5_argrunnf",
+          "type": "classification"
+        }
+      }
+    },
+    "location": {
+      "description": "Geographic coordinates",
+      "dataset": "Grid_8m_Dataset",
+      "fields": {
+        "loc_long": {
+          "description": "Longitude",
+          "path": "Grid_8m_Dataset/Grid_8m_Location",
+          "type": "coordinate",
+          "unit": "degrees"
+        },
+        "loc_lat": {
+          "description": "Latitude",
+          "path": "Grid_8m_Dataset/Grid_8m_Location",
+          "type": "coordinate",
+          "unit": "degrees"
+        }
+      }
+    }
+  },
+  "summary": {
+    "total_fields": 57,
+    "total_categories": 12,
+    "input_datasets_required": [
+      "Grid_8m_SR16_Dataset",
+      "Grid_8m_AR5_Dataset",
+      "Grid_8m_Dataset"
+    ],
+    "computed_datasets": []
+  }
+}

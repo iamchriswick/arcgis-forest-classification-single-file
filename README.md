@@ -15,20 +15,20 @@ This repository demonstrates a **phase-by-phase development strategy** for creat
 
 ## 🔄 Development Phases
 
-| Phase        | Version | Focus                                             | Status                              |
-| ------------ | ------- | ------------------------------------------------- | ----------------------------------- |
-| **Phase 1**  | v0.1.1  | Basic toolbox structure and parameter definitions | ✅ Complete                         |
-| **Phase 2**  | v0.1.2  | Core data processing capabilities                 | ✅ Complete                         |
-| **Phase 3**  | v0.1.3  | Field management and validation                   | ✅ Complete                         |
-| **Phase 4**  | v0.1.4  | Basic classification algorithms                   | ✅ Complete                         |
-| **Phase 5**  | v0.1.5  | External data source integration                  | ✅ Complete                         |
-| **Phase 6**  | v0.1.6  | Performance optimization and memory management    | ✅ Complete                         |
-| **Phase 7**  | v0.1.7  | Enhanced data validation and error handling       | ✅ Complete                         |
-| **Phase 8**  | v0.1.8  | Multi-threaded processing implementation          | ✅ Complete                         |
-| **Phase 9**  | v0.1.9  | Advanced classification algorithms                | ✅ Complete                         |
-| **Phase 10** | v0.1.10 | External API integration (FROST weather data)     | ✅ Complete                         |
-| **Phase 11** | v0.1.11 | Performance optimization and caching              | ✅ Complete                         |
-| **Phase 12** | v0.1.12 | Production features and enhanced GUI              | ✅ Complete - **95% Test Coverage** |
+| Phase        | Version | Focus                                              | Status                              |
+| ------------ | ------- | -------------------------------------------------- | ----------------------------------- |
+| **Phase 1**  | v0.1.12 | Basic toolbox structure and parameter definitions  | ✅ Complete                         |
+| **Phase 2**  | v0.2.1  | Core data processing with IMPORT_FIELDS validation | ✅ Complete                         |
+| **Phase 3**  | v0.1.3  | Field management and validation                    | ✅ Complete                         |
+| **Phase 4**  | v0.1.4  | Basic classification algorithms                    | ✅ Complete                         |
+| **Phase 5**  | v0.1.5  | External data source integration                   | ✅ Complete                         |
+| **Phase 6**  | v0.1.6  | Performance optimization and memory management     | ✅ Complete                         |
+| **Phase 7**  | v0.1.7  | Enhanced data validation and error handling        | ✅ Complete                         |
+| **Phase 8**  | v0.1.8  | Multi-threaded processing implementation           | ✅ Complete                         |
+| **Phase 9**  | v0.1.9  | Advanced classification algorithms                 | ✅ Complete                         |
+| **Phase 10** | v0.1.10 | External API integration (FROST weather data)      | ✅ Complete                         |
+| **Phase 11** | v0.1.11 | Performance optimization and caching               | ✅ Complete                         |
+| **Phase 12** | v0.1.12 | Production features and enhanced GUI               | ✅ Complete - **95% Test Coverage** |
 
 ## 🧪 Testing Excellence
 

@@ -114,14 +114,6 @@ revision_notes: Updated header format and documentation structure
 | ------------- | ------------------ | --------------------------------------------- |
 | `srrkronedek` | Crown coverage (%) | Grid_8m_SR16_Dataset/Grid_8m_SR16_srrkronedek |
 
-## **Elevation**
-
-| Field Name  | Description           | Path                    |
-| ----------- | --------------------- | ----------------------- |
-| `elev_min`  | Minimum elevation (m) | Table_Grid_8m_ElevStats |
-| `elev_mean` | Mean elevation (m)    | Table_Grid_8m_ElevStats |
-| `elev_max`  | Maximum elevation (m) | Table_Grid_8m_ElevStats |
-
 ## **Soil Properties**
 
 | Field Name | Description                  | Path                                     |
@@ -130,9 +122,17 @@ revision_notes: Updated header format and documentation structure
 | `artype`   | Soil type classification     | Grid_8m_AR5_Dataset/Grid_8m_AR5_artype   |
 | `argrunnf` | Soil depth / foundation      | Grid_8m_AR5_Dataset/Grid_8m_AR5_argrunnf |
 
+## **Elevation**
+
+| Field Name  | Description           | Path                              |
+| ----------- | --------------------- | --------------------------------- |
+| `elev_min`  | Minimum elevation (m) | Grid_8m_Dataset/Grid_8m_Elevation |
+| `elev_mean` | Mean elevation (m)    | Grid_8m_Dataset/Grid_8m_Elevation |
+| `elev_max`  | Maximum elevation (m) | Grid_8m_Dataset/Grid_8m_Elevation |
+
 ## **Location**
 
-| Field Name | Description | Path             |
-| ---------- | ----------- | ---------------- |
-| `loc_long` | Longitude   | Grid_8m_Location |
-| `loc_lat`  | Latitude    | Grid_8m_Location |
+| Field Name | Description | Path                             |
+| ---------- | ----------- | -------------------------------- |
+| `loc_long` | Longitude   | Grid_8m_Dataset/Grid_8m_Location |
+| `loc_lat`  | Latitude    | Grid_8m_Dataset/Grid_8m_Location |

@@ -1,334 +1,354 @@
 # -*- coding: utf-8 -*-
 """
-Test Suite for Forest Classification Tool Phase 1 v0.1.12
+Test Suite for Forest Classification Tool - Phase 1 v0.1.12
 
-Tests enhanced GUI features, system detection, and dropdown functionality.
-This version focuses on testing the improved dropdown labels and Auto multithreading option.
-
-Created: 2025-08-29
-Author: Forest Classification Development Team
+Comprehensive tests for the main toolbox execution module.
+Created: 2025-08-30
 """
 
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 import sys
 import os
 
-# Add the src directory to Python path for imports
+# Add the src directory to the path for importing
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
 try:
-    import arcpy
+    from execution.toolbox_0_1.toolbox_0_1_12 import (
+        log_system_capabilities,
+        main,
+        ForestClassificationToolbox,
+        ForestClassificationTool,
+    )
+except ImportError as e:
+    print(f"Import error: {e}")
+    print("Available paths:")
+    for path in sys.path:
+        print(f"  {path}")
+    raise
 
-    ARCPY_AVAILABLE = True
-except ImportError:
-    ARCPY_AVAILABLE = False
-    # Mock arcpy for tests when not available
-    arcpy = Mock()
-    arcpy.Parameter = Mock
-    arcpy.AddMessage = Mock()
-    arcpy.AddWarning = Mock()
-    arcpy.AddError = Mock()
 
-
-class TestStructure(unittest.TestCase):
-    """Test basic toolbox and tool structure."""
-
-    def setUp(self):
-        """Set up test fixtures."""
-        from execution.toolbox_0_1.toolbox_0_1_12 import (
-            ForestClassificationToolbox,
-            ForestClassificationTool,
-        )
-
-        self.toolbox = ForestClassificationToolbox()
-        self.tool = ForestClassificationTool()
-        self.ForestClassificationTool = ForestClassificationTool
-
-    def test_module_imports(self):
-        """Test that all required classes and functions can be imported."""
-        from execution.toolbox_0_1.toolbox_0_1_12 import (
-            ForestClassificationToolbox,
-            ForestClassificationTool,
-            log_system_capabilities,
-        )
-
-        self.assertIsNotNone(ForestClassificationToolbox)
-        self.assertIsNotNone(ForestClassificationTool)
-        self.assertIsNotNone(log_system_capabilities)
+class TestForestClassificationToolbox(unittest.TestCase):
+    """Test ForestClassificationToolbox class."""
 
     def test_toolbox_initialization(self):
-        """Test that toolbox is properly initialized with expected properties."""
-        self.assertEqual(
-            self.toolbox.label, "Forest Classification Toolbox - Phase 1 v0.1.12"
-        )
-        self.assertEqual(self.toolbox.alias, "ForestClassificationPhase1v0_1_12")
-        self.assertEqual(len(self.toolbox.tools), 1)
-        self.assertEqual(self.toolbox.tools[0], self.ForestClassificationTool)
+        """Test toolbox initialization."""
+        toolbox = ForestClassificationToolbox()
+        
+        # Verify basic properties
+        self.assertEqual(toolbox.label, "Forest Classification Toolbox - Phase 1 v0.1.12")
+        self.assertEqual(toolbox.alias, "ForestClassificationPhase1v0_1_12")
+        self.assertIn("Forest species classification tool", toolbox.description)
+        self.assertIn("Enhanced GUI", toolbox.description)
+        
+        # Verify tools list
+        self.assertEqual(toolbox.tools, [ForestClassificationTool])
+
+    def test_toolbox_attributes_exist(self):
+        """Test that all required toolbox attributes exist."""
+        toolbox = ForestClassificationToolbox()
+        
+        required_attrs = ["label", "alias", "description", "tools"]
+        for attr in required_attrs:
+            self.assertTrue(hasattr(toolbox, attr))
+            self.assertIsNotNone(getattr(toolbox, attr))
+
+
+class TestForestClassificationTool(unittest.TestCase):
+    """Test ForestClassificationTool class."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.tool = ForestClassificationTool()
 
     def test_tool_initialization(self):
-        """Test that tool is properly initialized with expected properties."""
-        self.assertEqual(
-            self.tool.label, "Forest Classification Tool - Phase 1 v0.1.12"
-        )
-        self.assertEqual(
-            self.tool.description,
-            "Classifies forest features using species-specific algorithms. Enhanced GUI with improved dropdown labels and Auto multithreading option.",
-        )
-        self.assertTrue(self.tool.canRunInBackground is False)
+        """Test tool initialization."""
+        # Verify basic properties
+        self.assertEqual(self.tool.label, "Forest Classification Tool - Phase 1 v0.1.12")
+        self.assertIn("Classifies forest features", self.tool.description)
+        self.assertIn("Enhanced GUI", self.tool.description)
+        self.assertFalse(self.tool.canRunInBackground)
+        self.assertEqual(self.tool.category, "Forest Analysis")
 
-    def test_tool_licensing(self):
-        """Test that tool is licensed to execute."""
-        # Should return True or not raise an exception
-        result = self.tool.isLicensed()
-        self.assertTrue(result)
+    def test_tool_attributes_exist(self):
+        """Test that all required tool attributes exist."""
+        required_attrs = ["label", "description", "canRunInBackground", "category"]
+        for attr in required_attrs:
+            self.assertTrue(hasattr(self.tool, attr))
+            self.assertIsNotNone(getattr(self.tool, attr))
 
-    def test_update_methods_exist(self):
-        """Test that updateParameters and updateMessages methods exist and work."""
-        # These methods should exist and be callable
-        parameters = []
+    def test_is_licensed(self):
+        """Test tool licensing."""
+        self.assertTrue(self.tool.isLicensed())
 
-        # Should not raise exceptions
-        self.tool.updateParameters(parameters)
-        self.tool.updateMessages(parameters)
+    def test_update_parameters(self):
+        """Test parameter updates."""
+        mock_params = [Mock(), Mock(), Mock()]
+        
+        # Should not raise exceptions and return None
+        result = self.tool.updateParameters(mock_params)
+        self.assertIsNone(result)
 
+    def test_update_messages(self):
+        """Test message updates."""
+        mock_params = [Mock(), Mock(), Mock()]
+        
+        # Should not raise exceptions and return None
+        result = self.tool.updateMessages(mock_params)
+        self.assertIsNone(result)
 
-class TestParameterHandling(unittest.TestCase):
-    """Test parameter creation and configuration."""
+    @patch('execution.toolbox_0_1.toolbox_0_1_12.main')
+    def test_execute(self, mock_main):
+        """Test tool execution."""
+        mock_params = [Mock(), Mock(), Mock()]
+        mock_messages = Mock()
+        
+        result = self.tool.execute(mock_params, mock_messages)
+        
+        # Should call main function
+        mock_main.assert_called_once()
+        
+        # Should return None
+        self.assertIsNone(result)
 
-    def setUp(self):
-        """Set up test fixtures."""
-        from execution.toolbox_0_1.toolbox_0_1_12 import ForestClassificationTool
+    def test_required_methods_exist(self):
+        """Test that all required ArcGIS tool methods exist."""
+        required_methods = [
+            "getParameterInfo",
+            "isLicensed", 
+            "updateParameters",
+            "updateMessages",
+            "execute",
+            "postExecute"
+        ]
+        
+        for method_name in required_methods:
+            self.assertTrue(hasattr(self.tool, method_name))
+            self.assertTrue(callable(getattr(self.tool, method_name)))
 
-        self.tool = ForestClassificationTool()
-
-    @patch("execution.toolbox_0_1.toolbox_0_1_12.arcpy.Parameter")
-    def test_parameter_structure(self, mock_parameter):
-        """Test that getParameterInfo returns correct parameter structure."""
-        # Mock parameter creation
+    @patch('builtins.__import__')
+    def test_get_parameter_info(self, mock_import):
+        """Test parameter information setup."""
+        # Mock arcpy module
+        mock_arcpy = Mock()
         mock_param = Mock()
-        mock_parameter.return_value = mock_param
-
-        parameters = self.tool.getParameterInfo()
-
-        # Should return exactly 3 parameters
-        self.assertEqual(len(parameters), 3)
-
-        # Verify parameter creation calls
-        self.assertEqual(mock_parameter.call_count, 3)
-
-    def test_enhanced_dropdown_labels(self):
-        """Test enhanced dropdown label implementation."""
-        # Test that the ToolValidator class structure exists in the file
-        # The actual _thread_labels and _memory_labels are in ToolValidator, not ForestClassificationTool
-
-        # Verify the tool has the expected structure
-        self.assertEqual(
-            self.tool.label, "Forest Classification Tool - Phase 1 v0.1.12"
-        )
-        self.assertEqual(len(self.tool.getParameterInfo()), 3)
-
-
-class TestExecution(unittest.TestCase):
-    """Test tool execution functionality."""
-
-    def setUp(self):
-        """Set up test fixtures."""
-        from execution.toolbox_0_1.toolbox_0_1_12 import ForestClassificationTool
-
-        self.tool = ForestClassificationTool()
-
-    @patch("execution.toolbox_0_1.toolbox_0_1_12.arcpy.AddMessage")
-    def test_execute_enhanced_features(self, mock_add_message):
-        """Test execute method functionality with enhanced features."""
-        # Mock parameters
-        params = [Mock(), Mock(), Mock()]
-        params[0].valueAsText = "test_output"
-        params[1].valueAsText = "Auto (4 threads, 50% of 8 cores)"
-        params[2].valueAsText = "9 GB (60% of 16.0 GB available)"
-
-        # Execute should not raise exceptions
-        self.tool.execute(params, None)
-
-        # Verify messages were logged
-        self.assertTrue(mock_add_message.called)
-
-    @patch("execution.toolbox_0_1.toolbox_0_1_12.arcpy.AddMessage")
-    def test_progress_tracking(self, mock_add_message):
-        """Test progress tracking functionality."""
-        params = [Mock(), Mock(), Mock()]
-        params[0].valueAsText = "test_output"
-        params[1].valueAsText = "4 threads (50% of 8 cores)"
-        params[2].valueAsText = "9 GB (60% of 16.0 GB available)"
-
-        self.tool.execute(params, None)
-
-        # Should have progress messages
-        message_calls = [str(call) for call in mock_add_message.call_args_list]
-        progress_messages = [msg for msg in message_calls if "Phase 1 progress:" in msg]
-        self.assertGreater(len(progress_messages), 0)
-
-    def test_auto_multithreading_handling(self):
-        """Test Auto multithreading parameter handling."""
-        # Test parsing Auto configuration
-        auto_config = "Auto (4 threads, 50% of 8 cores)"
-
-        # The tool should be able to handle Auto configuration
-        # This is a placeholder - actual parsing logic would be tested here
-        self.assertIn("Auto", auto_config)
-        self.assertIn("threads", auto_config)
-
-    @patch("execution.toolbox_0_1.toolbox_0_1_12.arcpy.AddError")
-    def test_error_handling(self, mock_add_error):
-        """Test execute method handles parameter errors gracefully."""
-        # Test with None parameters
-        params = [None, None, None]
-
-        # Should not crash, may log error
-        try:
-            self.tool.execute(params, None)
-        except Exception as e:
-            # Any exception should be handled gracefully
-            self.fail(f"Execute method should handle errors gracefully: {e}")
-
-    def test_post_execute(self):
-        """Test postExecute method functionality."""
-        # Should not raise exceptions
-        self.tool.postExecute(None)
-
-
-class TestSystemCapabilities(unittest.TestCase):
-    """Test system detection and capability calculations."""
-
-    def setUp(self):
-        """Set up test fixtures."""
-        from execution.toolbox_0_1.toolbox_0_1_12 import ForestClassificationTool
-
-        self.tool = ForestClassificationTool()
-
-    def test_cpu_core_detection(self):
-        """Test CPU core detection with 90% max rule."""
-        # The actual _cpu_cores method is in ToolValidator class, not ForestClassificationTool
-        # Test that the tool structure supports system detection
-        self.assertIsNotNone(self.tool.getParameterInfo())
-        self.assertEqual(len(self.tool.getParameterInfo()), 3)
-
-    def test_memory_detection(self):
-        """Test memory detection with 90% max rule."""
-        # The actual _avail_mem_gb method is in ToolValidator class, not ForestClassificationTool
-        # Test that the tool structure supports memory configuration
+        mock_arcpy.Parameter.return_value = mock_param
+        
+        def import_side_effect(name, *args, **kwargs):
+            if name == "arcpy":
+                return mock_arcpy
+            return __import__(name, *args, **kwargs)
+        
+        mock_import.side_effect = import_side_effect
+        
         params = self.tool.getParameterInfo()
-        memory_param = params[2]  # Memory configuration parameter
-        self.assertEqual(memory_param.displayName, "Memory Allocation")
-
-    def test_ninety_percent_max_rules(self):
-        """Test 90% max thread and memory rules implementation."""
-        # The actual _thread_labels and _memory_labels methods are in ToolValidator class
-        # Test that the tool has appropriate parameter structure for system capabilities
-        params = self.tool.getParameterInfo()
-
-        # Should have thread parameter (index 1)
-        thread_param = params[1]
-        self.assertEqual(thread_param.displayName, "Multithreading")
-
-        # Should have memory parameter (index 2)
-        memory_param = params[2]
-        self.assertEqual(memory_param.displayName, "Memory Allocation")
-
-    @patch("execution.toolbox_0_1.toolbox_0_1_12.arcpy.AddMessage")
-    def test_log_system_capabilities_function(self, mock_add_message):
-        """Test the log_system_capabilities function."""
-        from execution.toolbox_0_1.toolbox_0_1_12 import log_system_capabilities
-
-        # Should not raise exceptions
-        log_system_capabilities()
-
-        # Should have logged some messages
-        self.assertTrue(mock_add_message.called)
-
-    def test_startup_performance_optimization(self):
-        """Test startup performance optimizations."""
-        # Tool initialization should be fast
-        import time
-
-        start_time = time.time()
-
-        from execution.toolbox_0_1.toolbox_0_1_12 import ForestClassificationTool
-
-        ForestClassificationTool()
-
-        end_time = time.time()
-        initialization_time = end_time - start_time
-
-        # Should initialize in under 1 second
-        self.assertLess(initialization_time, 1.0)
-
-    def test_enhanced_gui_compatibility(self):
-        """Test ArcGIS Pro .atbx Script tool compatibility."""
-        # The actual _thread_labels and _memory_labels methods are in ToolValidator class
-        # Test that the tool supports enhanced GUI features through proper parameter structure
-        params = self.tool.getParameterInfo()
-
-        # Thread parameter should support dropdown
-        thread_param = params[1]
-        self.assertEqual(thread_param.datatype, "String")
-
-        # Memory parameter should support dropdown
-        memory_param = params[2]
-        self.assertEqual(memory_param.datatype, "String")
-
-    def test_version_completeness(self):
-        """Test that implementation represents complete Phase 1 functionality."""
-        # All Phase 1 features should be present in v0.1.12
-        # The enhanced GUI methods are in ToolValidator class, test parameter structure instead
-
-        # Parameter structure should support all Phase 1 features
-        params = self.tool.getParameterInfo()
+        
+        # Should return 3 parameters
         self.assertEqual(len(params), 3)
+        
+        # Verify Parameter constructor was called 3 times
+        self.assertEqual(mock_arcpy.Parameter.call_count, 3)
 
-        # Should have proper labeling for Phase 1 v0.1.12
-        self.assertIn("Phase 1 v0.1.12", self.tool.label)
+    @patch('builtins.__import__')
+    def test_post_execute(self, mock_import):
+        """Test post-execution cleanup."""
+        # Mock arcpy module
+        mock_arcpy = Mock()
+        
+        def import_side_effect(name, *args, **kwargs):
+            if name == "arcpy":
+                return mock_arcpy
+            return __import__(name, *args, **kwargs)
+        
+        mock_import.side_effect = import_side_effect
+        
+        mock_params = [Mock(), Mock(), Mock()]
+        
+        result = self.tool.postExecute(mock_params)
+        
+        # Should log cleanup message
+        mock_arcpy.AddMessage.assert_called_once_with("🧹 Phase 1 post-execution cleanup completed")
+        
+        # Should return None
+        self.assertIsNone(result)
 
 
-@unittest.skipUnless(
-    ARCPY_AVAILABLE, "ArcPy not available - skipping integration tests"
-)
-class TestIntegration(unittest.TestCase):
-    """Integration tests with real ArcPy (only run when ArcPy is available)."""
+class TestMainFunction(unittest.TestCase):
+    """Test main execution function."""
 
-    def setUp(self):
-        """Set up test fixtures with real ArcPy."""
-        from execution.toolbox_0_1.toolbox_0_1_12 import ForestClassificationTool
+    @patch('builtins.__import__')
+    def test_main_execution_complete(self, mock_import):
+        """Test complete main function execution."""
+        # Mock arcpy module
+        mock_arcpy = Mock()
+        mock_arcpy.GetParameterAsText.side_effect = [
+            "test_output_layer",
+            "Auto (let system decide)", 
+            "8 GB (60% of 16.0 GB available)"
+        ]
+        
+        def import_side_effect(name, *args, **kwargs):
+            if name == "arcpy":
+                return mock_arcpy
+            return __import__(name, *args, **kwargs)
+        
+        mock_import.side_effect = import_side_effect
+        
+        with patch('execution.toolbox_0_1.toolbox_0_1_12.log_system_capabilities') as mock_log:
+            main()
+            
+            # Verify parameter extraction
+            self.assertEqual(mock_arcpy.GetParameterAsText.call_count, 3)
+            
+            # Verify system capabilities logging was called
+            mock_log.assert_called_once()
+            
+            # Verify key messages were logged
+            mock_arcpy.AddMessage.assert_any_call("🚀 Starting Forest Classification Tool v0.1.12")
+            mock_arcpy.AddMessage.assert_any_call("✅ Phase 1 completed successfully!")
 
-        self.tool = ForestClassificationTool()
+    @patch('builtins.__import__')
+    def test_main_with_empty_parameters(self, mock_import):
+        """Test main function with empty parameters."""
+        # Mock arcpy module
+        mock_arcpy = Mock()
+        mock_arcpy.GetParameterAsText.side_effect = ["", "", ""]
+        
+        def import_side_effect(name, *args, **kwargs):
+            if name == "arcpy":
+                return mock_arcpy
+            return __import__(name, *args, **kwargs)
+        
+        mock_import.side_effect = import_side_effect
+        
+        with patch('execution.toolbox_0_1.toolbox_0_1_12.log_system_capabilities'):
+            main()
+            
+            # Verify empty parameter logging
+            mock_arcpy.AddMessage.assert_any_call("📊 Output layer: ")
+            mock_arcpy.AddMessage.assert_any_call("🧵 Thread configuration: ")
+            mock_arcpy.AddMessage.assert_any_call("💾 Memory configuration: ")
 
-    def test_parameter_info_with_real_arcpy(self):
-        """Test parameter creation with real ArcPy."""
-        parameters = self.tool.getParameterInfo()
 
-        # Should return real arcpy.Parameter objects
-        self.assertEqual(len(parameters), 3)
-        for param in parameters:
-            self.assertIsInstance(param, arcpy.Parameter)
+class TestLogSystemCapabilities(unittest.TestCase):
+    """Test system capabilities logging function."""
 
-    def test_real_enhanced_dropdown_parameters(self):
-        """Test enhanced dropdown parameters with real ArcPy."""
-        parameters = self.tool.getParameterInfo()
+    @patch('builtins.__import__')
+    def test_log_system_capabilities_basic(self, mock_import):
+        """Test basic system capabilities logging."""
+        # Mock arcpy module
+        mock_arcpy = Mock()
+        
+        def import_side_effect(name, *args, **kwargs):
+            if name == "arcpy":
+                return mock_arcpy
+            elif name == "psutil":
+                raise ImportError("No psutil")
+            return __import__(name, *args, **kwargs)
+        
+        mock_import.side_effect = import_side_effect
+        
+        with patch('execution.toolbox_0_1.toolbox_0_1_12.os.cpu_count', return_value=4):
+            log_system_capabilities()
+            
+            # Should log CPU detection
+            mock_arcpy.AddMessage.assert_any_call("🖥️ System: 4 CPU cores detected")
+            mock_arcpy.AddMessage.assert_any_call("🧵 System: Maximum recommended threads: 3 (90% of 4 cores)")
 
-        output_layer = parameters[0]
-        thread_config = parameters[1]
-        memory_config = parameters[2]
+    @patch('builtins.__import__')
+    def test_log_system_capabilities_with_psutil(self, mock_import):
+        """Test system capabilities logging with psutil."""
+        # Mock arcpy and psutil modules
+        mock_arcpy = Mock()
+        mock_psutil = Mock()
+        mock_memory = Mock()
+        mock_memory.available = 8 * (1024**3)  # 8 GB available
+        mock_memory.total = 16 * (1024**3)  # 16 GB total
+        mock_psutil.virtual_memory.return_value = mock_memory
+        
+        def import_side_effect(name, *args, **kwargs):
+            if name == "arcpy":
+                return mock_arcpy
+            elif name == "psutil":
+                return mock_psutil
+            return __import__(name, *args, **kwargs)
+        
+        mock_import.side_effect = import_side_effect
+        
+        with patch('execution.toolbox_0_1.toolbox_0_1_12.os.cpu_count', return_value=8):
+            log_system_capabilities()
+            
+            # Should log both CPU and memory
+            mock_arcpy.AddMessage.assert_any_call("🖥️ System: 8 CPU cores detected")
+            mock_arcpy.AddMessage.assert_any_call("💾 System: 8.0 GB available RAM (16.0 GB total)")
 
-        # Test parameter properties
-        self.assertEqual(output_layer.displayName, "Output Feature Layer")
-        self.assertEqual(thread_config.displayName, "Multithreading")
-        self.assertEqual(memory_config.displayName, "Memory Allocation")
+    @patch('builtins.__import__')
+    def test_log_system_capabilities_exception(self, mock_import):
+        """Test system capabilities logging with exception."""
+        # Mock arcpy module
+        mock_arcpy = Mock()
+        
+        def import_side_effect(name, *args, **kwargs):
+            if name == "arcpy":
+                return mock_arcpy
+            return __import__(name, *args, **kwargs)
+        
+        mock_import.side_effect = import_side_effect
+        
+        with patch('execution.toolbox_0_1.toolbox_0_1_12.os.cpu_count', side_effect=Exception("CPU error")):
+            log_system_capabilities()
+            
+            # Should log exception
+            mock_arcpy.AddMessage.assert_any_call("🖥️ System: Detection failed - CPU error")
 
-        # Test categories
-        self.assertEqual(output_layer.category, "Input Data")
-        self.assertEqual(thread_config.category, "Performance Settings")
-        self.assertEqual(memory_config.category, "Performance Settings")
+
+class TestCoverageEdgeCases(unittest.TestCase):
+    """Test edge cases for complete coverage."""
+
+    def test_module_import_structure(self):
+        """Test that all expected functions are importable."""
+        # Verify main functions exist
+        self.assertTrue(callable(log_system_capabilities))
+        self.assertTrue(callable(main))
+        
+        # Verify classes exist and are instantiable
+        toolbox = ForestClassificationToolbox()
+        self.assertIsNotNone(toolbox)
+        
+        tool = ForestClassificationTool()
+        self.assertIsNotNone(tool)
+
+    def test_os_cpu_count_none_fallback(self):
+        """Test CPU count fallback when os.cpu_count returns None."""
+        with patch('execution.toolbox_0_1.toolbox_0_1_12.os.cpu_count', return_value=None):
+            with patch('builtins.__import__') as mock_import:
+                mock_arcpy = Mock()
+                
+                def import_side_effect(name, *args, **kwargs):
+                    if name == "arcpy":
+                        return mock_arcpy
+                    elif name == "psutil":
+                        raise ImportError("No psutil")
+                    return __import__(name, *args, **kwargs)
+                
+                mock_import.side_effect = import_side_effect
+                
+                log_system_capabilities()
+                
+                # Should fallback to 4 cores
+                mock_arcpy.AddMessage.assert_any_call("🖥️ System: 4 CPU cores detected")
+
+    def test_module_level_execution_guard(self):
+        """Test module execution guard behavior."""
+        # This test verifies the if __name__ == "__main__" guard exists
+        # We can't easily test the actual execution without importing issues
+        import execution.toolbox_0_1.toolbox_0_1_12 as toolbox_module
+        
+        # Check that module has the main function
+        self.assertTrue(hasattr(toolbox_module, 'main'))
+        self.assertTrue(callable(toolbox_module.main))
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)

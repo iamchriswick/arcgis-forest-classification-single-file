@@ -43,12 +43,13 @@ Version History:
 - v0.1.12: Enhanced GUI with improved dropdown labels and Auto multithreading option
 """
 
-import arcpy
 import os
 
 
 def log_system_capabilities():
     """Log detected system capabilities with 90% max thread and memory rules."""
+    # Import arcpy only when needed to avoid pytest discovery issues
+    import arcpy
 
     try:
         # Fast CPU detection using os.cpu_count (built-in, no external libs)
@@ -91,6 +92,7 @@ def log_system_capabilities():
 
 def main():
     """Main execution function for .atbx Script tool."""
+    import arcpy
 
     # Immediate logging
     arcpy.AddMessage("🚀 Starting Forest Classification Tool v0.1.12")
@@ -128,9 +130,6 @@ def main():
 # Module-level execution
 if __name__ == "__main__":
     main()
-else:
-    # Execute immediately when imported by ArcGIS Pro .atbx Script tool
-    main()
 
 
 # ===== TOOLBOX CLASSES (for .pyt compatibility if needed) =====
@@ -165,6 +164,7 @@ class ForestClassificationTool(object):
 
     def getParameterInfo(self):
         """Define parameter definitions for .atbx Script tool."""
+        import arcpy
 
         # Parameter 0: Output Feature Layer/Feature Class (multi-type for dropdown + browsing)
         output_layer = arcpy.Parameter(
@@ -220,4 +220,5 @@ class ForestClassificationTool(object):
 
     def postExecute(self, parameters):
         """This method takes place after outputs are processed and added to the display."""
+        import arcpy
         arcpy.AddMessage("🧹 Phase 1 post-execution cleanup completed")

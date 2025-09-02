@@ -1,5 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
+# -*- coding: utf-8 -*-# -*- coding: utf-8 -*-
+
+(
+    """Execution tests package"""
+    """
 Execution Tests Package
 
 Tests for main toolbox functionality including:
@@ -11,6 +14,7 @@ Tests for main toolbox functionality including:
 
 Each toolbox_0_N subdirectory contains tests for that specific phase implementation.
 """
+)
 
 import unittest
 import os
@@ -80,6 +84,41 @@ def get_available_phases():
                 continue
 
     return sorted(phases)
+
+
+def load_tests(loader, tests, pattern):
+    """
+    Load all test cases from this package.
+    This function is automatically called by unittest discovery.
+    """
+    start_dir = os.path.dirname(__file__)
+    return loader.discover(start_dir, pattern="test_*.py")
+
+
+def get_test_suite():
+    """
+    Get a test suite containing all execution tests.
+    Usage: python -c "from tests.execution import get_test_suite; unittest.TextTestRunner().run(get_test_suite())"
+    """
+    loader = unittest.TestLoader()
+    start_dir = os.path.dirname(__file__)
+    return loader.discover(start_dir, pattern="test_*.py")
+
+
+def get_test_summary():
+    """
+    Get summary information about execution tests.
+
+    Returns:
+        dict: Summary of test information
+    """
+    phases = get_available_phases()
+    return {
+        "version": __version__,
+        "focus": __focus__,
+        "available_phases": phases,
+        "phase_count": len(phases),
+    }
 
 
 # Package metadata

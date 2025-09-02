@@ -31,7 +31,7 @@ The ToolValidator will provide:
 # ===== TOOLVALIDATOR CODE FOR .ATBX SCRIPT TOOL =====
 # Copy the entire ToolValidator class below to .atbx Properties → Validation:
 
-import arcpy
+# ArcPy import deferred to method level to prevent pytest crashes
 import os
 
 
@@ -44,6 +44,7 @@ class ToolValidator(object):
     """
 
     def __init__(self):
+        import arcpy  # Deferred import to prevent pytest crashes
         self.params = (
             arcpy.GetParameterInfo()
         )  # 0=output_layer, 1=multithreading_config, 2=memory_config
@@ -96,6 +97,7 @@ class ToolValidator(object):
 
         # Populate output layer dropdown if a map is active
         try:
+            import arcpy  # Deferred import to prevent pytest crashes
             aprx = arcpy.mp.ArcGISProject("CURRENT")
             m = aprx.activeMap
             if m:
@@ -118,6 +120,7 @@ class ToolValidator(object):
         self.params[2].filter.list = self._memory_labels(self._avail_mem_gb())
 
         try:
+            import arcpy  # Deferred import to prevent pytest crashes
             aprx = arcpy.mp.ArcGISProject("CURRENT")
             m = aprx.activeMap
             if m:

@@ -1,5 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
+# -*- coding: utf-8 -*-# -*- coding: utf-8 -*-
+
+(
+    """Validation tests package"""
+    """
 Validation Tests Package
 
 Tests for ToolValidator classes and GUI enhancement features including:
@@ -11,6 +14,7 @@ Tests for ToolValidator classes and GUI enhancement features including:
 
 Each toolbox_0_N subdirectory contains validation tests for that specific phase.
 """
+)
 
 import unittest
 import os

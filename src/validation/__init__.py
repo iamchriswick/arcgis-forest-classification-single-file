@@ -1,1 +1,2 @@
-# Validation source package for phase-based single file development
+# -*- coding: utf-8 -*-
+"""Validation source package"""
