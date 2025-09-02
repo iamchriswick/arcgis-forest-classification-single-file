@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Forest Classification Tool - Phase 2: Core Data Processing v0.2.4
+Forest Classification Tool - Phase 2: Core Data Processing v0.2.5
 
 Created: 2025-08-29 11:30
-Version: 0.2.4
+Version: 0.2.5
 
 Phase 2 Features:
 - All Phase 1 features (basic toolbox structure, parameters, system detection)
@@ -30,6 +30,7 @@ ToolValidator dropdown UI is controlled by the .atbx Properties → Validation.
 
 Version History:
 Phase 2 Change Log:
+- v0.2.5: Implemented multi-source field mapping from IMPORT_FIELDS.json for complete data population
 - v0.2.4: Implemented proper CUD (Create, Update, Delete) field operations for existing layers
 - v0.2.3: Fixed parameter alignment with .atbx tool (3 params: output, thread, memory)
 - v0.2.2: Added main() function for .atbx Script tool execution
@@ -37,6 +38,46 @@ Phase 2 Change Log:
 """
 
 import arcpy
+import json
+import os
+
+
+def get_field_source_mappings():
+    """Load IMPORT_FIELDS.json and create field-to-source-path mappings.
+
+    Returns:
+        dict: Mapping of field names to their source layer paths
+    """
+    try:
+        # Get the path to IMPORT_FIELDS.json relative to this script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        import_fields_path = os.path.join(
+            script_dir, "..", "..", "..", "data", "IMPORT_FIELDS.json"
+        )
+
+        arcpy.AddMessage(f"📋 Loading field mappings from: {import_fields_path}")
+
+        with open(import_fields_path, "r") as f:
+            import_fields = json.load(f)
+
+        # Create field name to source path mapping
+        field_mappings = {}
+        for category_name, category_data in import_fields.get(
+            "field_categories", {}
+        ).items():
+            for field_name, field_data in category_data.get("fields", {}).items():
+                source_path = field_data.get("path", "")
+                if source_path:
+                    field_mappings[field_name] = source_path
+
+        arcpy.AddMessage(
+            f"📊 Loaded {len(field_mappings)} field mappings from IMPORT_FIELDS.json"
+        )
+        return field_mappings
+
+    except Exception as e:
+        arcpy.AddWarning(f"⚠️ Could not load IMPORT_FIELDS.json: {e}")
+        return {}
 
 
 def get_system_capabilities():
@@ -563,86 +604,92 @@ def main():
                         )
                         fields_created.append(field)
 
-                # UPDATE: Actually update field values from input data
+                # UPDATE: Multi-source field mapping using IMPORT_FIELDS.json
                 all_target_fields = [
                     f
                     for f in target_fields
                     if f in existing_fields or f in fields_created
                 ]
                 updated_count = 0  # Initialize counter
+
                 if all_target_fields:
-                    # Get all available data fields from input layer (excluding system fields)
-                    input_fields = [
-                        f.name for f in arcpy.ListFields(input_feature_layer)
-                    ]
-                    input_data_fields = [
-                        f
-                        for f in input_fields
-                        if f not in ["OBJECTID", "Shape", "Shape_Area", "Shape_Length"]
-                    ]
-
-                    # Find which target fields actually exist in input layer
-                    available_source_fields = [
-                        f for f in all_target_fields if f in input_data_fields
-                    ]
+                    # Load field mappings from IMPORT_FIELDS.json
+                    field_mappings = get_field_source_mappings()
 
                     arcpy.AddMessage(
-                        f"🔄 Input layer has {len(input_data_fields)} data fields: {', '.join(input_data_fields)}"
-                    )
-                    arcpy.AddMessage(
-                        f"🔄 Will update {len(available_source_fields)} matching fields: {', '.join(available_source_fields)}"
+                        f"🔄 Processing {len(all_target_fields)} target fields with multi-source mapping"
                     )
 
-                    if available_source_fields:
-                        # Use UpdateCursor to transfer values row by row
-                        arcpy.AddMessage("📋 Starting field value updates...")
+                    # Process each target field individually from its source layer
+                    for field_name in all_target_fields:
+                        if field_name in field_mappings:
+                            source_path = field_mappings[field_name]
+                            arcpy.AddMessage(
+                                f"📊 Processing {field_name} from: {source_path}"
+                            )
 
-                        # Create dictionary to store input data values by OBJECTID
-                        input_data = {}
-                        with arcpy.da.SearchCursor(
-                            input_feature_layer,
-                            ["OBJECTID"] + available_source_fields,
-                        ) as search_cursor:
-                            for row in search_cursor:
-                                oid = row[0]
-                                values = row[
-                                    1:
-                                ]  # Field values (preserving Null values)
-                                input_data[oid] = dict(
-                                    zip(available_source_fields, values)
+                            try:
+                                # Check if source layer exists and has the field
+                                if arcpy.Exists(source_path):
+                                    source_fields = [
+                                        f.name for f in arcpy.ListFields(source_path)
+                                    ]
+                                    if field_name in source_fields:
+                                        # Read data from source layer
+                                        source_data = {}
+                                        with arcpy.da.SearchCursor(
+                                            source_path, ["OBJECTID", field_name]
+                                        ) as search_cursor:
+                                            for row in search_cursor:
+                                                oid = row[0]
+                                                value = row[1]
+                                                source_data[oid] = value
+
+                                        arcpy.AddMessage(
+                                            f"  📋 Read {len(source_data)} records from {source_path}"
+                                        )
+
+                                        # Update output layer field
+                                        field_updated_count = 0
+                                        with arcpy.da.UpdateCursor(
+                                            output_path, ["OBJECTID", field_name]
+                                        ) as update_cursor:
+                                            for row in update_cursor:
+                                                output_oid = row[0]
+                                                if output_oid in source_data:
+                                                    # Update with value from source (preserving Null)
+                                                    new_value = source_data[output_oid]
+                                                    updated_row = [
+                                                        output_oid,
+                                                        new_value,
+                                                    ]
+                                                    update_cursor.updateRow(updated_row)
+                                                    field_updated_count += 1
+
+                                        arcpy.AddMessage(
+                                            f"  ✅ Updated {field_updated_count} records for {field_name}"
+                                        )
+                                        updated_count += field_updated_count
+                                    else:
+                                        arcpy.AddWarning(
+                                            f"  ⚠️ Field {field_name} not found in source layer {source_path}"
+                                        )
+                                else:
+                                    arcpy.AddWarning(
+                                        f"  ⚠️ Source layer not found: {source_path}"
+                                    )
+                            except Exception as e:
+                                arcpy.AddWarning(
+                                    f"  ❌ Error processing {field_name}: {e}"
                                 )
+                        else:
+                            arcpy.AddWarning(
+                                f"  ⚠️ No source mapping found for field: {field_name}"
+                            )
 
-                        arcpy.AddMessage(
-                            f"📊 Read {len(input_data)} records from input layer"
-                        )
-
-                        # Update output layer with input data values, mapping by OBJECTID
-                        with arcpy.da.UpdateCursor(
-                            output_path, ["OBJECTID"] + available_source_fields
-                        ) as update_cursor:
-                            for row in update_cursor:
-                                output_oid = row[0]
-
-                                # Find matching input record by OBJECTID
-                                if output_oid in input_data:
-                                    # Update the row with new values (preserving Null values)
-                                    updated_row = [output_oid]  # Start with OBJECTID
-                                    for field in available_source_fields:
-                                        new_value = input_data[output_oid][field]
-                                        updated_row.append(
-                                            new_value
-                                        )  # Copy value as-is (including Null)
-
-                                    update_cursor.updateRow(updated_row)
-                                    updated_count += 1
-
-                        arcpy.AddMessage(
-                            f"✅ Updated {updated_count} records with field values from input layer"
-                        )
-                    else:
-                        arcpy.AddMessage(
-                            "⚠️ No matching fields found between input and output layers"
-                        )
+                    arcpy.AddMessage(
+                        f"✅ Multi-source field mapping completed: {updated_count} total record updates"
+                    )
                 else:
                     arcpy.AddMessage("ℹ️ No target fields to update")
 
@@ -657,9 +704,7 @@ def main():
                     except Exception as e:
                         arcpy.AddWarning(f"⚠️ Could not delete field {field}: {e}")
 
-                arcpy.AddMessage(
-                    f"✅ CUD operations completed: {len(fields_created)} created, {updated_count} records updated, {deleted_count} fields deleted"
-                )
+                arcpy.AddMessage(f"✅ CUD operations completed: {len(fields_created)} created, {updated_count} records updated, {deleted_count} fields deleted")
             else:
                 arcpy.AddMessage(
                     "📋 Output layer doesn't exist - creating from input..."
